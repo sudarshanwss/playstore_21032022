@@ -79,8 +79,8 @@ class cardRequestedAction extends baseAction{
       $temp['is_deck_message'] = ($card['is_deck'] == CONTENT_ACTIVE)?"in deck":"not in deck";
       $temp['is_deck'] = $card['is_deck'];
       $cardLevelUpDetail = $cardLib->getMasterCardLevelUpgradeForCardCount($card['level_id']+1, $card['card_rarity_type']);
-      $temp['next_level_card_count'] = $cardLevelUpDetail['card_count'];
-     /* $temp['next_level_gold_cost'] = $cardLevelUpDetail['gold'];
+      /*$temp['next_level_card_count'] = $cardLevelUpDetail['card_count'];
+      $temp['next_level_gold_cost'] = $cardLevelUpDetail['gold'];
       $temp['next_level_xp_bonus'] = $cardLevelUpDetail['xp'];*/
       $temp['total_card'] = $card['user_card_count'];
       $temp['card_level'] = $card['level_id'];
@@ -89,22 +89,21 @@ class cardRequestedAction extends baseAction{
     }
 
     //$lockedCardList = $cardLib->getLockedMasterCardList($this->userId);
-    /*$rarityArray = array(
+    $rarityArray = array(
       array("1", "40", "Common"),
-      array("2", "10", "Rare"),
+      array("2", "40", "Rare"),
       array("3", "40", "Epic"),
       array("4", "40", "Ultra Epic")
-  );*/
-  $rarityArray=$cardLib->getMasterCardRequestDetails();
+  );
     //for($i=1;$i<=$isRarityCount;$i++){
       $rarityTypeList = array();
       //$lockedCardList = $cardLib->getMasterCardListForRequestWithVersion($this->androidVerId, $this->iosVerId, $i);
       foreach($rarityArray as $ra){
         if($temp['rarity_type']<$isRarityCount){
           $temp = array();
-          $temp['rarity_type'] = $ra['type']; 
-          $temp['max_count'] = $ra['max_count']; 
-          $temp['title'] = $ra['name']; 
+          $temp['rarity_type'] = $ra[0]; 
+          $temp['max_count'] = $ra[1]; 
+          $temp['title'] = $ra[2]; 
           $rarityTypeList[]= $temp; 
        }
       }

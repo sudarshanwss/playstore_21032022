@@ -116,7 +116,7 @@ class kingdomReceiveAction extends baseAction{
         $temp['kingdom_msg_type'] = $msg['msg_type'];
         $temp['kingdom_chat_type'] = $msg['chat_type']; 
         //&& $msg['battle_state']
-        if($msg['msg_type']==3 && ($msg['msg_type']!=0 || !empty($msg['msg_type']))){
+        if($msg['msg_type']==3){
           $frndbattleHist = $userLib->getFriendlyBattleHistoryList($this->userId, $msg['room_id']);
         if(empty($frndbattleHist)){
             $frndbattleHist = $userLib->getFriendlyBattleHistoryList($msg['sent_by'], $msg['room_id']);
@@ -249,9 +249,7 @@ class kingdomReceiveAction extends baseAction{
           }else{
             $temp3['is_donatable'] = 0;
           }
-          $cardD=$cardLib->getMasterCardDetail($cardRequestData['master_card_id']);
-          $requestCardD= $cardLib->getMasterCardRequestDetailsByRarity($cardD['card_rarity_type']);
-          if($cardRequestData['card_count']>=$requestCardD['max_count']){
+          if($cardRequestData['card_count']>=40){
             $is_delete=1;
             $kingdomLib->updateKingdomReqMessage($msg['km_id'], array(
               'battle_state' => 4
@@ -262,13 +260,12 @@ class kingdomReceiveAction extends baseAction{
           $temp3['master_card_id'] = $cardRequestData['master_card_id'];
           $temp3['card_count']= !empty($cardDonaterData['card_count'])?$cardDonaterData['card_count']:0;
           $temp3['request_type'] = $cardRequestData['request_type'];
-          $temp3['is_available'] = 1;
           $temp3['msg_id']= $cardRequestData['msg_id'];  
           $temp3['end_time']= $cardRequestData['end_time'];
           $temp3['total_cards']= $userCardR['user_card_count']; 
           $temp3['total_cards_recieved']= $cardRequestData['card_count'];
           $temp3['max_card_per_user']= 10;
-          $temp3['max_card_count']= $requestCardD['max_count'];
+          $temp3['max_card_count']= 40;
           $temp['request_card_details']=$temp3;
         
         }

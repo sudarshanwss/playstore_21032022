@@ -61,7 +61,6 @@ class kingdomSendAction extends baseAction
     //$roomLib = autoload::loadLibrary('queryLib', 'room');
     $kingdomLib = autoload::loadLibrary('queryLib', 'kingdom');
     $inviteLib = autoload::loadLibrary('queryLib', 'invite');
-    $cardLib = autoload::loadLibrary('queryLib', 'card');
     //$notificationLib = autoload::loadLibrary('queryLib', 'notification');
     date_default_timezone_set('Asia/Kolkata');
     $result = array(); 
@@ -89,7 +88,6 @@ class kingdomSendAction extends baseAction
               'created_at' => date('Y-m-d H:i:s')
           ));
           }
-      $result['msg_delete_id']=empty($kingdomBattleData['km_id'])?"":$kingdomBattleData['km_id'];
     }
     if($this->kingdomMsgType==3){
       if($this->battleState==4){
@@ -98,9 +96,7 @@ class kingdomSendAction extends baseAction
         $frndlyBattleDetails = $inviteLib->getFriendlyInviteDetailByUserId($this->userId);
         //print_log("deleted::".$deletemsgId);
         //print_log("deleted id from fetched::".$kingdomBattleData['km_id']);
-
-        //$result['msg_delete_id']=$kingdomBattleData['km_id'];
-        $result['msg_delete_id']=empty($kingdomBattleData['km_id'])?$deletemsgId:$kingdomBattleData['km_id'];
+        $result['msg_delete_id']=$kingdomBattleData['km_id'];
         //$result['battle_state'] = $this->battleState; // 1 for requested , 2 for pending, 3 for result
       }elseif($this->battleState==5){
         /*$invitedUser = $userLib->getUserDetail($this->receiverId);
@@ -119,7 +115,7 @@ class kingdomSendAction extends baseAction
           }
           $frndlyBattleDetails = $inviteLib->getFriendlyInviteDetailByUserId($this->receiverId);
           $inviteLib->updateBattleInvite($frndlyBattleDetails['friendly_invite_id'], array('accepted_user_id'=>$this->userId));
-          $result['msg_delete_id']=empty($kingdomBattleData['km_id'])?$deletemsgId:$kingdomBattleData['km_id'];
+          $result['msg_delete_id']=$kingdomBattleData['km_id'];
       }elseif($this->battleState==10){
         $kingdomMsId = $kingdomLib->getKingdomBattleByState($this->userId);
         if($this->battleIsAvailable==1){
@@ -156,10 +152,7 @@ class kingdomSendAction extends baseAction
           'msg_delete_id' => empty($kingdomBattleData['km_id'])?"":$kingdomBattleData['km_id'], 
           'created_at' => date('Y-m-d H:i:s')
         ));
-        $result['msg_delete_id'] = empty($kingdomBattleData['km_id'])?"":$kingdomBattleData['km_id'];
       }
-      $kingdomBattleData = $kingdomLib->getKingdomBattleByState($this->userId);
-      //$result['msg_delete_id'] = empty($kingdomBattleData['km_id'])?"":$kingdomBattleData['km_id'];
     }
     
     
@@ -216,7 +209,6 @@ class kingdomSendAction extends baseAction
               'created_at' => date('Y-m-d H:i:s')
             ));
           }
-          $result['msg_delete_id'] = empty($kingdomBattleData['km_id'])?"":$kingdomBattleData['km_id'];
         }
         $temp2=array();
         $endtime = date("Y-m-d H:i:s", strtotime('+8 hours'));
@@ -241,9 +233,7 @@ class kingdomSendAction extends baseAction
         $temp2['total_cards']= $userCardR['user_card_count']; 
         $temp2['total_cards_recieved']= empty($cardRequestData['card_count'])?0:$cardRequestData['card_count'];
         $temp2['max_card_per_user']= 10;
-        $cardD=$cardLib->getMasterCardDetail($this->masterCardId);
-        $requestCardD= $cardLib->getMasterCardRequestDetailsByRarity($cardD['card_rarity_type']);
-        $temp2['max_card_count']= $requestCardD['max_count'];
+        $temp2['max_card_count']= 40;
       }
       if($this->kingdomMsgRequestType==2){
         $userCardDataS=$kingdomLib->getUserCardDetail($this->senderId,$this->masterCardId); //sender
@@ -254,9 +244,7 @@ class kingdomSendAction extends baseAction
         }else{
           $cardRequestData = $kingdomLib->getRequestedOfCardRequestDetail($this->receiverId,1, date('Y-m-d H:i:s'));
           $cardDonaterData = $kingdomLib->getRequestedOfCardRequestDetail($this->senderId, 2, date('Y-m-d H:i:s'));
-          $cardD=$cardLib->getMasterCardDetail($this->masterCardId);
-          $requestCardD= $cardLib->getMasterCardRequestDetailsByRarity($cardD['card_rarity_type']);
-          if($cardRequestData['card_count']>=$requestCardD['max_count']){
+          if($cardRequestData['card_count']>=40){
             $is_delete=1;
           }else{
             if($cardDonaterData['card_count']<=10){
@@ -275,7 +263,7 @@ class kingdomSendAction extends baseAction
                   'msg_delete_id' => empty($deletedId)?"":$deletedId,
                   'created_at' => $cardRequestData['created_at']
                 ));
-                $result['msg_delete_id'] = empty($deletedId)?"":$deletedId;
+                
                 $requestMsgId = $kingdomLib->insertKingdomCardRequest(array(
                   'master_card_id' => $this->masterCardId,
                   'card_count' => $cardDonaterData['card_count']+1,
@@ -302,7 +290,6 @@ class kingdomSendAction extends baseAction
                   'msg_delete_id' => empty($deletedId)?"":$deletedId, 
                   'created_at' => $cardRequestData['created_at']
                 ));
-                $result['msg_delete_id'] = empty($deletedId)?"":$deletedId;
                 $kingdomLib->updateCardReqMessage($cardDonaterData['card_request_inventory_id'], array(
                   'msg_id' => $deletedId,
                   'card_count' => $cardDonaterData['card_count']+1,
@@ -337,9 +324,7 @@ class kingdomSendAction extends baseAction
               }else{ 
                 $temp4['is_donatable'] = 0; 
               }
-              $cardD=$cardLib->getMasterCardDetail($this->masterCardId);
-              $requestCardD= $cardLib->getMasterCardRequestDetailsByRarity($cardD['card_rarity_type']);
-              if($cardRequestData['card_count']>=$requestCardD['max_count']){
+              if($cardRequestData['card_count']>=40){
                 $is_delete=1;
               }
               $userCardR=$kingdomLib->getUserCardDetail($this->senderId,$this->masterCardId); //reciever
@@ -352,9 +337,7 @@ class kingdomSendAction extends baseAction
               $temp4['total_cards']= $userCardR['user_card_count']; 
               $temp4['total_cards_recieved']= $cardRequestData['card_count'];
               $temp4['max_card_per_user']= 10;
-              //$cardD=$cardLib->getMasterCardDetail($this->masterCardId);
-              //$requestCardD= $cardLib->getMasterCardRequestDetailsByRarity($cardD['card_rarity_type']);
-              $temp4['max_card_count']= $requestCardD['max_count'];
+              $temp4['max_card_count']= 40;
 
             }else{
               $this->setResponse('SUCCESS');
@@ -424,7 +407,7 @@ class kingdomSendAction extends baseAction
     $result['chat_type'] = $this->kingdomChatType;
     $result['battle_type'] = $this->battleType;
     $result['message'] = $this->kingdomMsg;
-    //$result['msg_delete_id']=$deletedId;
+    $result['msg_delete_id']=$deletedId;
     if($this->kingdomMsgType==3){
       $result['kingdomfrindbattle']=$temp1;
     }

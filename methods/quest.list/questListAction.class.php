@@ -445,7 +445,7 @@ class questListAction extends baseAction{
             $questData= $questLib->getBattleQuestData(7,$this->userId);
             if($qUserStadiumv['slide_count']!=$qUserStadiumv['slide_maxvalue']){
              
-              if($user['master_stadium_id']<=5){
+              if($user['master_stadium_id']<5){
                 $questLib->updateQuestInventory($questData['quest_id'], $this->userId, array('slide_count' => $user['master_stadium_id']));
               }elseif($user['master_stadium_id']>5){
                 $questLib->updateQuestInventory($questData['quest_id'], $this->userId, array('slide_count' => $qUserStadiumv['slide_maxvalue']));
@@ -455,9 +455,8 @@ class questListAction extends baseAction{
               
             }  
             $qv = $questLib->getQuestUserStadium5Reward($this->userId);
-            //if($user[])
-            $temp['current_slider_value']=!empty($qv['slide_count'])?$qv['slide_count']:0;
 
+            $temp['current_slider_value']=!empty($qv['slide_count'])?$qv['slide_count']:0;
             if($temp['slider_maxvalue']<=$temp['current_slider_value']){
               $temp['isclaimed']=0;
             }else{

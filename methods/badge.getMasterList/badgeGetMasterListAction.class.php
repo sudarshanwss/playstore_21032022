@@ -59,14 +59,14 @@ class badgeGetMasterListAction extends baseAction{
     if(empty($userDetail['season_id'])){ //!empty($userDetail['old_relics']) && $userDetail['old_relics']==0 && 
         $userLib->updateUser($this->userId, array('season_id' => $ulsll['season_id']));
       }
-     /* $userList = $userLib->getUserList();
+      $userList = $userLib->getUserList();
       foreach($userList as $ul){
       $ulResetData = $badgeLib->getUserRelicsDiff($ul['relics']);
       $ulOldtrophies=$ul['relics'];
         if($ul['season_id']!=$ulsll['season_id']){  //!empty($ul['season_id']) &&  && $ul['old_relics']<=0 
           if(!empty($ulResetData)){
             /* Reset with Percentage Logic*/
-          /*  $minimumBadgeValue = $badgeLib->getMasterBadgeMinimumList();
+            $minimumBadgeValue = $badgeLib->getMasterBadgeMinimumList();
             $userDetail = $userLib->getUserDetail($ul['user_id']);
             $userRelicsValue= $userDetail['relics'];
             $resetRelicsValue =$ulResetData['reset_value'];
@@ -75,13 +75,13 @@ class badgeGetMasterListAction extends baseAction{
             $getPercDeductVal = $getRemainCups-($getRemainCups*$resetPerc);
             $getResetVal= $getPercDeductVal+$minimumBadgeValue['min_relic_count'];
             /* Reset with Percentage Logic*/
-            /*if($ul['season_id']!=$ulsll['season_id'] && $ul['relics']>$minimumBadgeValue['min_relic_count']){  //!empty($ul['season_id']) && 
+            if($ul['season_id']!=$ulsll['season_id'] && $ul['relics']>$minimumBadgeValue['min_relic_count']){  //!empty($ul['season_id']) && 
               $userLib->updateUser($ul['user_id'], array('relics' => floor($getResetVal), 'old_relics'=>$ulOldtrophies, 'season_id'=>$ulsll['season_id']));
             }
             
           }
         }
-      }*/
+      }
     }
 
     
@@ -180,9 +180,9 @@ class badgeGetMasterListAction extends baseAction{
       }
       $temp2['remaining_time'] = $seconds;
       $seasonDetailResult = $temp2;
-    }*/
-    
+    }
+    */ 
     $this->setResponse('SUCCESS');
-    return array('badge_list' => $result, 'season_league' => $seasonLeagueResult);//, 'season_detail' => $seasonDetailResult
+    return array('badge_list' => $result, 'season_league' => $seasonLeagueResult);//'season_detail' => $seasonDetailResult
   }
 }

@@ -54,9 +54,15 @@ class userLoginAction extends baseAction{
 
     if($this->deviceToken != "")
     {
-      
       $deviceUser = $userLib->getUserForDeviceToken($this->deviceToken);
-      
+      //android
+      if(!empty($deviceUser['google_id'])){
+        $userLib->updateUser($deviceUser['user_id'], array('device_token'=>$deviceUser['device_token']."_".$deviceUser['user_id']));
+      }
+      //ios
+      if(!empty($deviceUser['game_center_id'])){
+        $userLib->updateUser($deviceUser['user_id'], array('device_token'=>$deviceUser['device_token']."_".$deviceUser['user_id']));
+      }
       print_log("du::".json_encode($deviceUser));
       $googleUser = $userLib->getUserForGoogleId($this->googleId);
       $gamecenterUser = $userLib->getUserForGameCenterId($this->gamecenterId);
@@ -85,10 +91,6 @@ class userLoginAction extends baseAction{
 
         if(!empty($this->platformId)){
           print_log("google::platform");
-              //android
-          if(!empty($deviceUser['google_id'])){
-            $userLib->updateUser($deviceUser['user_id'], array('device_token'=>$deviceUser['device_token']."_".$deviceUser['user_id']));
-          }
           $is_alert=$userLib->getUserSameLoginDetailWithPlatform($this->deviceToken,$this->platformId);
         }else{
           $is_alert=$userLib->getUserSameLoginDetail($this->deviceToken);
@@ -110,57 +112,47 @@ class userLoginAction extends baseAction{
           $is_in=1;
         }
       }elseif($this->platformId==2 && ((empty($deviceUser) && empty($gamecenterUser)) || (empty($deviceUser) && $this->gamecenterId==""))){
-        $deviceUser = $userLib->getUserForDeviceTokenForAll($this->deviceToken);
-        if(!empty($deviceUser) && $this->platformId==2){
-          $userId = $deviceUser['user_id'];
+        print_log("gamecenter::In1");
+        $randVal = rand(7,9); 
+        $user_uid = $userLib->secure_random_string($randVal);
+        $userId = $userLib->insertUser(array(
+                    'name' => $this->name,
+                    'type' => USER_TYPE_GUEST,
+                    'device_token' => $this->deviceToken,
+                    'ios_push_token' => $this->iosPushToken,
+                    'android_push_token' => $this->androidPushToken,
+                    'access_token' => $accessToken,
+                    'master_stadium_id' => DEFAULT_STADIUM,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'user_uid' => strtoupper($user_uid),
+                    'seq_id'=> rand(1,10),
+                    'status' => CONTENT_ACTIVE));
+
+        $userLib->processRegistration($userId);
+
+        if(!empty($this->platformId)){
+          print_log("gamecenter::platform");
+          $is_alert=$userLib->getUserSameLoginDetailWithPlatform($this->deviceToken,$this->platformId);
         }else{
-          print_log("gamecenter::In1");
-          $randVal = rand(7,9); 
-          $user_uid = $userLib->secure_random_string($randVal);
-          $userId = $userLib->insertUser(array(
-                      'name' => $this->name,
-                      'type' => USER_TYPE_GUEST,
-                      'device_token' => $this->deviceToken,
-                      'ios_push_token' => $this->iosPushToken,
-                      'android_push_token' => $this->androidPushToken,
-                      'access_token' => $accessToken,
-                      'master_stadium_id' => DEFAULT_STADIUM,
-                      'created_at' => date('Y-m-d H:i:s'),
-                      'user_uid' => strtoupper($user_uid),
-                      'seq_id'=> rand(1,10),
-                      'status' => CONTENT_ACTIVE));
-
-          $userLib->processRegistration($userId);
-
-          if(!empty($this->platformId)){
-            print_log("gamecenter::platform");
-            //ios
-            if(!empty($deviceUser['game_center_id'])){
-              $userLib->updateUser($deviceUser['user_id'], array('device_token'=>$deviceUser['device_token']."_".$deviceUser['user_id']));
-            }
-            $is_alert=$userLib->getUserSameLoginDetailWithPlatform($this->deviceToken,$this->platformId);
-          }else{
-            $is_alert=$userLib->getUserSameLoginDetail($this->deviceToken);
-          }
-          
-
-          //strtok($mystring, '_');
-          $is_in=0;
-          foreach($is_alert as $ia){
-            if(!empty($ia['game_center_id'])){
-              $isAlertId= $ia['user_id'];
-              $isAlertName= !empty($ia['name'])?$ia['name']:"Guest_".$ia['user_id'];
-              $isAlertLevel=$ia['level_id'];
-              $isGameCenterId=$ia['game_center_id'];
-            }
-          }
-          if(!empty($isGameCenterId)){
-            $userLib->updateUser($userId, array("is_alert" => 1));
-            $userLib->updateUser($userId, array('is_login'=> 1));
-            $is_in=1;
-          }  
+          $is_alert=$userLib->getUserSameLoginDetail($this->deviceToken);
         }
         
+
+        //strtok($mystring, '_');
+        $is_in=0;
+        foreach($is_alert as $ia){
+          if(!empty($ia['game_center_id'])){
+            $isAlertId= $ia['user_id'];
+            $isAlertName= !empty($ia['name'])?$ia['name']:"Guest_".$ia['user_id'];
+            $isAlertLevel=$ia['level_id'];
+            $isGameCenterId=$ia['game_center_id'];
+          }
+        }
+        if(!empty($isGameCenterId)){
+          $userLib->updateUser($userId, array("is_alert" => 1));
+          $userLib->updateUser($userId, array('is_login'=> 1));
+          $is_in=1;
+        }  
       }elseif(empty($deviceUser) && empty($this->platformId)){
         $randVal = rand(7,9);
         $user_uid = $userLib->secure_random_string($randVal);
@@ -183,7 +175,7 @@ class userLoginAction extends baseAction{
         $userId = $deviceUser['user_id'];
       }
     }
-    if($this->platformId==1 && $this->googleId != "")
+    if($this->googleId != "")
     {
       $googleUser = $userLib->getUserForGoogleId($this->googleId);
       if(!empty($googleUser['user_id'])){
@@ -192,7 +184,7 @@ class userLoginAction extends baseAction{
         $userId = $googleUser['user_id'];
       } 
     }
-    if($this->platformId==2 && $this->gamecenterId != "")
+    if($this->gamecenterId != "")
     {
       $gamecenterUser = $userLib->getUserForGameCenterId($this->gamecenterId);
       if(!empty($gamecenterUser['user_id'])){

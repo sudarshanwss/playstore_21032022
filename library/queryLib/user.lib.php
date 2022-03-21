@@ -79,17 +79,6 @@ class user{
     $result = database::doSelect($sql);
     return $result;
   }
-  public function getUserDetailsOnRelicsForSpecificUser($userId,$options=array()){
-    $sql ="SELECT * from (SELECT user_id, name, facebook_id, avatar_url, is_ai, relics,
-            ROW_NUMBER() over (order by relics desc) as srno
-          FROM user
-          WHERE is_ai!=1
-          ORDER BY relics DESC) as t
-          WHERE t.user_id=:userId AND t.is_ai!=1
-          ORDER BY relics DESC"; 
-    $result = database::doSelectOne($sql, array('userId'=>$userId));
-    return $result;
-  }
   public function getUserLevelDetails()
   {
     $sqlxp = "SELECT *
@@ -273,15 +262,6 @@ class user{
             WHERE device_token = :deviceToken";
 
     $result = database::doSelectOne($sql, array('deviceToken' => $deviceToken));
-    return $result;
-  }
-  public function getUserForDeviceTokenForAll($deviceToken, $options = array())
-  {
-    $sql = "SELECT *
-            FROM user
-            WHERE device_token LIKE '%".$deviceToken."%'";
-
-    $result = database::doSelectOne($sql);
     return $result;
   }
 

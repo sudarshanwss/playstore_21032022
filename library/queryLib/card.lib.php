@@ -47,23 +47,7 @@ class card{
     $result = database::doSelectOne($sql, array('cardId' => $cardId));
     return $result;
   }
-  public function getMasterCardRequestDetails($options=array())
-  {
-    $sql = "SELECT *
-            FROM master_card_request_details";
 
-    $result = database::doSelect($sql);
-    return $result;
-  }
-  public function getMasterCardRequestDetailsByRarity($rarityType, $options=array())
-  {
-    $sql = "SELECT *
-            FROM master_card_request_details
-            WHERE type=:rarityType";
-
-    $result = database::doSelectOne($sql, array('rarityType' => $rarityType));
-    return $result;
-  }
   public function insertMasterCard($options=array())
   {
     $sql = "INSERT INTO master_card ";
@@ -275,16 +259,6 @@ public function getMasterCardListBasedOnStadiumAndRarity($masterStadiumId, $rari
             LIMIT ".$limit;
 
     $result = database::doSelect($sql, array('masterStadiumId' => $masterStadiumId, 'rarityType' => $rarityType));
-    return $result;
-  }
-  public function getMastercardCountByRarity($rarityType, $options=array())
-  {
-    $sql="SELECT *
-          FROM master_daily_card_count_by_rarity
-          WHERE rarity_type =:rarityType AND status=1
-          ORDER BY RAND()
-          LIMIT 1";
-    $result = database::doSelectOne($sql, array('rarityType' => $rarityType));
     return $result;
   }
   public function getMasterCardListBasedOnStadiumAndRarityWithVersion($masterStadiumId, $rarityType, $probability, $excludeCardId=0, $limit, $andVer, $iosVer, $options=array())
@@ -668,11 +642,11 @@ public function getUserCardUnlockLevelOnRarityTypeAndMasterCardId($masterCardId,
     if(!empty($andVer)){
       $sql = "SELECT mc.*
               FROM master_card mc
-              WHERE master_stadium_id <= (SELECT master_stadium_id FROM user WHERE user_id=:userId) AND mc.is_available=1 AND INET_ATON(mc.android_version_id)<=INET_ATON('".$andVer."')";
+              WHERE master_stadium_id <= (SELECT master_stadium_id FROM user WHERE user_id=:userId) AND INET_ATON(mc.android_version_id)<=INET_ATON('".$andVer."')";
     }elseif(!empty($iosVer)){
       $sql = "SELECT mc.*
               FROM master_card mc
-              WHERE master_stadium_id <= (SELECT master_stadium_id FROM user WHERE user_id=:userId) AND mc.is_available=1 AND INET_ATON(ios_version_id)<=INET_ATON('".$iosVer."')";
+              WHERE master_stadium_id <= (SELECT master_stadium_id FROM user WHERE user_id=:userId) AND INET_ATON(ios_version_id)<=INET_ATON('".$iosVer."')";
     }else{
       $sql = "SELECT mc.*
             FROM master_card mc

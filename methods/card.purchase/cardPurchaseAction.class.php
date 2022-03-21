@@ -69,12 +69,11 @@ class cardPurchaseAction extends baseAction{
 
     $userLib->updateUser($this->userId, array('gold' => $userDetail['gold'] - $goldrequired));
     $userCardDetail = $cardLib->getUserCardDetailForMastercardId($this->userId, $this->masterCardId);
-    $userCardDetailWithLevel = $cardLib->getUserCardUnlockLevelOnRarityTypeAndMasterCardId($this->masterCardId);
     if(empty($userCardDetail)) {
       $cardLib->insertUserCard(array(
         'user_id' => $this->userId,
         'master_card_id' => $this->masterCardId,
-        'level_id' => empty($userCardDetailWithLevel['level_id'])?DEFAULT_CARD_LEVEL_ID:$userCardDetailWithLevel['level_id'],
+        'level_id' => DEFAULT_CARD_LEVEL_ID,
         'user_card_count' => $this->count,
         'is_deck' => CONTENT_INACTIVE,
         'created_at' => date('Y-m-d H:i:s'),

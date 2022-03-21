@@ -143,13 +143,13 @@ class kingdom{
             WHERE kingdom_id = :kingdomId AND battle_state!=4
             HAVING room_id IS NULL
             UNION
-              SELECT * FROM (SELECT *
+              SELECT *
               FROM kingdom_messages
               WHERE kingdom_id = :kingdomId
+              GROUP BY room_id
               HAVING room_id IS NOT NULL
               ORDER BY km_id DESC
-              LIMIT 100) grp
-              GROUP BY room_id) lst
+              LIMIT 100) lst
                   ORDER BY km_id ASC";
     }else{ 
      /* $sql = "SELECT *
@@ -158,17 +158,16 @@ class kingdom{
       $sql = "SELECT *
               FROM (SELECT *
                 FROM kingdom_messages
-                WHERE kingdom_id = :kingdomId AND battle_state!=4 AND km_id > $lastMsgId
+                WHERE kingdom_id = :kingdomId AND km_id > $lastMsgId
                 HAVING room_id IS NULL
                 UNION
-                  SELECT * FROM (SELECT *
+                  SELECT *
                   FROM kingdom_messages
-                  WHERE kingdom_id = :kingdomId AND battle_state!=4 AND km_id > $lastMsgId
+                  WHERE kingdom_id = :kingdomId AND km_id > $lastMsgId
+                  GROUP BY room_id
                   HAVING room_id IS NOT NULL
                   ORDER BY km_id DESC
-                  LIMIT 100) grp
-                  GROUP BY room_id
-                  ) lst
+                  LIMIT 100) lst
                   ORDER BY km_id ASC";
             //battle_state!=4 AND 
     }

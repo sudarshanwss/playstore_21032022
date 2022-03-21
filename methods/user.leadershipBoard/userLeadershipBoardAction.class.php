@@ -66,9 +66,8 @@ class userLeadershipBoardAction extends baseAction{
         }
     }
     if($matched == 0){
-      $userRelic = $userLib->getUserDetailsOnRelicsForSpecificUser($this->userId);
-      //$userRelicsDetails = $userLib->getUserDetailsOnRelics();
-      /*foreach ($userRelicsDetails as $userRelic)
+      $userRelicsDetails = $userLib->getUserDetailsOnRelics();
+      foreach ($userRelicsDetails as $userRelic)
       {  
         if($userRelic['user_id']==$this->userId){
           $tempi = array();
@@ -82,19 +81,13 @@ class userLeadershipBoardAction extends baseAction{
          // print_log($res);
           
         }
-      }*/
-          $tempi = array();
-          $tempi['rank'] = $userRelic['srno'];
-          $tempi['name'] = $userRelic['name'];
-          $tempi['user_id'] = $userRelic['user_id'];
-          $tempi['facebook_id']=$userRelic['facebook_id'];
-          $tempi['relics'] = $userRelic['relics'];
-          $tempi['avatar_url']=$userRelic['avatar_url'];
-         $res[] = $tempi;
+      }
+
       //print_log(array_merge($result,$res));
-     // if(!empty($res)){
+      if(!empty($res)){
         $result=array_merge($res,$result);
-      //}
+      }
+      
     }
     //print_log("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------".$this->userId);
     //print_log($result);

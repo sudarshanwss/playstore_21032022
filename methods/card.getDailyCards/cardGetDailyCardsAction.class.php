@@ -63,62 +63,27 @@ class cardGetDailyCardsAction extends baseAction{
       //refresh card list after each 8 hours
       $randomcardList = array_rand($masterCardList, SHOP_CARD_COUNT);
       //print_log($randomcardList);
-      $cc_value = array();
-      for($i=0; $i<SHOP_CARD_COUNT; $i++){
-        print_log($randomcardList[$i]);
-        $masterCardDetailData = $cardLib->getMasterCardDetail($randomcardList[$i]);
-        
-        $userCardDetailCnt = $cardLib->getMastercardCountByRarity($masterCardDetailData['card_rarity_type']);
-        
-        $cc_value[] = $userCardDetailCnt['card_count'];
-        print_log($userCardDetailCnt['card_count']);
-      }
-      //$ccv_data = $cc_value;
-      
-
-      $userCardDetailCount = $cardLib->getMastercardCountByRarity($list['card_rarity_type']);
       $dailyCard->insertUserDailyCard(array(
         'user_id' => $this->userId,
         'card_id' => implode(",",$randomcardList),
-        'card_count' => implode(",",$cc_value),
         'created_at' => date('Y-m-d H:i:s'),
         'status' => CONTENT_ACTIVE
       ));
       $remainingTime = (strtotime(date('Y-m-d H:i:s')) + 28800) - time();
-    }  
+    } 
       
     foreach($randomcardList as $key=>$value) {
       $list = $masterCardList[$value];
       $userCardDetail = $cardLib->getUserCardDetailForMastercardId($this->userId, $list['master_card_id']);
-      $userCardDetailLevelId = $userCardDetail;
-      
+      if(empty($userCardDetail)){
+        $userCardDetail = $cardLib->getUserCardDetailForMastercardIdIfNull($list['master_card_id']);
+      }
       $item['master_card_id'] = $list['master_card_id'];
       $cardId[] = $list['master_card_id'];
       $item['title'] = $list['title'];
       $item['card_type'] = $list['card_type'];
       $item['card_type_message'] = ($list['card_type'] == CARD_TYPE_CHARACTER) ? 'Character' : 'Power';
       $item['card_rarity_type'] = $list['card_rarity_type'];
-      $item['card_level'] = (!empty($userCardDetailLevelId['level_id'])) ? $userCardDetailLevelId['level_id'] : DEFAULT_CARD_LEVEL_ID;
-      if(empty($userCardDetail)){
-        $userCardDetail = $cardLib->getUserCardDetailForMastercardIdIfNull($list['master_card_id']);
-        $userCardDetailLevelId = $cardLib->getUserCardUnlockLevelOnRarityTypeAndMasterCardId($list['master_card_id']);
-        $item['total_card'] = 0;//DEFAULT_CARD_COUNT
-        $item['next_level_card_count'] = 1;
-        //$levelUpgradeCardDetail = $cardLib->getMasterCardLevelUpgradeForCardCount($item['card_level']+1, $list['card_rarity_type']);
-        $masterCardDetail = $cardLib->getMasterCardDetail($list['master_card_id']);
-        $item['next_level_gold_cost'] = $masterCardDetail['gold'];
-        $item['card_cost'] = $userCardDetail['gold'];
-        $item['total_card'] = (!empty($userCardDetail['user_card_count']))  ? $userCardDetail['user_card_count'] : 0;//DEFAULT_CARD_COUNT
-      }else{
-        //$userCardDetail = $cardLib->getUserCardDetailForMastercardId($list['master_card_id']);
-        $item['total_card'] = (!empty($userCardDetail['user_card_count']))  ? $userCardDetail['user_card_count'] : 0;//DEFAULT_CARD_COUNT
-        $levelUpgradeCardDetail = $cardLib->getMasterCardLevelUpgradeForCardCount($item['card_level']+1, $list['card_rarity_type']);
-        $item['next_level_card_count'] = $levelUpgradeCardDetail['card_count'];
-        $masterCardDetail = $cardLib->getMasterCardDetail($list['master_card_id']);
-        $item['next_level_gold_cost'] = $masterCardDetail['gold'];
-        $item['card_cost'] = $userCardDetail['gold'];
-        //$item['total_card'] = (!empty($userCardDetail['user_card_count']))  ? $userCardDetail['user_card_count'] : 0;//DEFAULT_CARD_COUNT
-      }
       if(!empty($list['android_version_id']) && !empty($this->androidVerId)){
         if(version_compare($list['android_version_id'],$this->androidVerId, '<=')){
           $item['is_available'] = 1; 
@@ -131,21 +96,16 @@ class cardGetDailyCardsAction extends baseAction{
         }else{
           $item['is_available'] = 0; 
         }
-      }else{   
+      }else{
         $item['is_available'] = $list['is_available'];
       }
-      $userCardDetailCount = $cardLib->getMastercardCountByRarity($list['card_rarity_type']);
       $item['rarity_type_message'] = ($list['card_rarity_type'] == CARD_RARITY_COMMON)?"Common":(($list['card_rarity_type'] == CARD_RARITY_RARE)?"Rare":(($list['card_rarity_type'] == CARD_RARITY_EPIC)?"Epic":"Ultra Epic"));
-      
-      $dailyCardDetailCount = $dailyCard->getUserDailyCardDetail($this->userId);
-        $randomcardListCount = explode(",",$dailyCardDetailCount['card_count']);
-      print_log("----------------------------------------random card count --------------------------------------------------");
-        print_log(json_encode($randomcardListCount));
-        print_log("-----------------------------------------------------------------------------------------------------------");
-      $item['card_to_added'] = (!empty($randomcardListCount[$key]))  ? $randomcardListCount[$key] : 0;
-      
-      
-      
+      $item['total_card'] = (!empty($userCardDetail)) && (!empty($userCardDetail['user_card_count']))  ? $userCardDetail['user_card_count'] : DEFAULT_CARD_COUNT;
+      $item['card_level'] = (!empty($userCardDetail)) ? $userCardDetail['level_id'] : DEFAULT_CARD_LEVEL_ID;
+      $levelUpgradeCardDetail = $cardLib->getMasterCardLevelUpgradeForCardCount($item['card_level']+1, $list['card_rarity_type']);
+      $item['next_level_card_count'] = $levelUpgradeCardDetail['card_count'];
+      $item['next_level_gold_cost'] = $levelUpgradeCardDetail['gold'];
+      $item['card_cost'] = $userCardDetail['gold'];
       if(!empty($dailyCardDetail['sold_id'])){
         $cardsList=explode(",",$dailyCardDetail['sold_id']);
         if(in_array($list['master_card_id'], $cardsList)){

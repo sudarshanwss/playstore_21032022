@@ -50,7 +50,7 @@ class userFbUnlinkAccountAction extends baseAction{
     $paramList['facebook_id'] = "";
     $userLib->updateFbUser($user_id, $paramList);
     
-    header('location: https://epikoregalapi.com/EPIKO/playstore/epiko-backend/fb/getid.php?u_id='.$user_id);
+    header('location: https://epikoregal.com/EPIKO/staging/fb/getid.php?u_id='.$user_id);
    //echo json_encode($data).",";
  
     //$this->setResponse('SUCCESS');
